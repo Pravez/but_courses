@@ -15,13 +15,13 @@ Ce TP est *noté*. Le rendu doit être une *archive zip* contenant :
 - Le code source de votre Terraform
 - Un document de réponses à toutes les questions posées dans le TP (blocs de couleur orange)
 
-Un template de réponses vous est fourni (`ANSWERS.md`), à remplir. N'oubliez pas de préciser votre nom, prénom et nom d'utilisateur dans le fichier (nom d'utilisateur = première lettre prénom + nom, par exemple `pbreton` pour `Paul Breton`, uniquement des lettres minuscules).
+Un template de réponses vous est fourni (`ANSWERS.md`), à remplir. N'oubliez pas de préciser votre nom, prénom et nom d'utilisateur dans le fichier (nom d'utilisateur = première lettre prénom + nom, par exemple `pbreton` pour `Paul Breton`, uniquement des lettres minuscules). Vous avez parfaitement le droit d'ajouter des images ou des captures d'écran dans votre document de réponses pour illustrer vos réponses.
 
 Le nom de l'archive doit être au format `tp_cloud_2025_<nom_utilisateur>.zip`.
 
 Attention à ne pas inclure de fichiers inutiles dans votre archive (logs, binaires, répertoires temporaires, etc.). Notamment le répertoire temporaire Terraform et les éventuels résultats temporaires de compilation Rust. Vous pouvez utiliser la commande suivante depuis votre terminal pour créer l'archive :
 
 ```bash
-> zip -r tp_cloud_2025_<nom_utilisateur>.zip [répertoire]/ -x "*/.terraform/*" "*/target/*"
+zip -r tp_cloud_2025_<nom_utilisateur>.zip [répertoire]/ -x "*/.terraform/*" "*/target/*"
 ```
 #pagebreak()
