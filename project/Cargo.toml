@@ -21,7 +21,5 @@ tracing-subscriber = { version = "0.3.20", features = [
     "std",
     "fmt",
 ] }
-tower-http = { version = "0.6", features = ["cors"] }
 axum = { version = "0.8.7", features = ["macros"] }
-tokio-util = "0.7.17"
 sqlx = { version = "0.8.6", features = ["chrono", "postgres", "runtime-tokio"] }
