@@ -36,3 +36,5 @@ terraform.rc
 
 .idea/
 .venv/
+
+!tp_sources/terraform/src/stack/terraform.auto.tfvars
