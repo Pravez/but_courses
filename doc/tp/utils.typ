@@ -20,15 +20,15 @@
   
   box(
     width: 100%,
-    inset: 10pt,
+  inset: 10pt,
     stroke: 1pt + config.stroke,
     fill: config.fill,
-    radius: 6pt,
-  )[
+  radius: 6pt,
+)[
     #config.icon #strong[#title]
-    #v(2pt)
-    #body
-  ]
+  #v(2pt)
+  #body
+]
 }
 
 

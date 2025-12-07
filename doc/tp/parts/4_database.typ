@@ -8,7 +8,7 @@ Votre MCP est maintenant déployé, mais ne démarre pas correctement. En effet,
 
 Vous allez avoir besoin d'un fichier `terraform/src/stack/database.tf` regroupant ces opérations sur la base.
 
-#utils.consigne[À l'aide du `remote state`, créez un `data` pour récupérer #link("https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/data-sources/rdb_instance")[instance de base de données]. Puis, créez une #link("https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/rdb_user")[`resource`] pour votre utilisateur en base de données. Attention à faire en sorte que celui-ci ait un nommage unique, et soit un utilisateur administrateur.]
+#utils.consigne[À l'aide du `remote state`, créez un `data` pour récupérer l'#link("https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/data-sources/rdb_instance")[instance de base de données]. Puis, créez une #link("https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/rdb_user")[`resource` pour votre utilisateur] en base de données. Attention à faire en sorte que celui-ci ait un nommage unique, et soit un utilisateur administrateur.]
 
 Vous avez votre utilisateur, et vous lui avez donné un mot de passe, parfait ! Si vous le désirez, vous pouvez vous connecter à la base de données et voir son contenu via votre outil de management de base de données (pgAdmin, DBeaver, DataGrip, ...). Cela dit, il vous manque l'URL ! Pour la visualiser, il vous suffit de créer un fichier `terraform/src/stack/_outputs.tf` et d'y ajouter un `output` comme suivant (à adapter à votre code) :
 
@@ -41,7 +41,7 @@ Votre MCP prend en variable d'environnement une _connection_string_ pour se conn
 postgres://<username>:<password>@<host>:<port>/<database>
 ```
 
-#utils.consigne[Dans un bloc #link("https://developer.hashicorp.com/terraform/language/block/locals")[`locals`], créez une variable `database_url` avec la valeur de votre _connection_string_. Puis, ajustez les variables d'environnement de votre conteneur via Terraform, et relancez votre conteneur grâce au `terraform apply`.]
+#utils.consigne[Dans un bloc #link("https://developer.hashicorp.com/terraform/language/block/locals")[`locals`], créez une variable `database_url` avec la valeur de votre _connection_string_. Faites en sorte que chaque composante de cette variable (username, password, ...) soit extraite depuis vos ressources Terraform (donc rien en dur). Puis, ajustez les variables d'environnement de votre conteneur via Terraform, et relancez votre conteneur grâce au `terraform apply`.]
 
 #utils.encart(title: "Pour aller plus vite avec les Serverless Containers", type: "info")[Si jamais votre container ne démarre pas, Terraform restera bloqué jusqu'à 10 minutes avant de couper. Les logs vous permettant de constater très vite un éventuel échec, vous n'avez pas besoin d'attendre autant de temps. Vous pouvez sur votre interface détruire directement le conteneur qui tente de démarrer, puis faire un CTRL-C dans votre terminal pour couper Terraform (ce qui est temps normal *formellement proscrit*, et à n'utiliser que dans ce cas très précis).]
 
