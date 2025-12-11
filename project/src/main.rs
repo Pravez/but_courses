@@ -5,9 +5,9 @@ use tracing_subscriber::{
     util::SubscriberInitExt,
     {self},
 };
-use crate::counter::Counter;
+use crate::mcp::Counter;
 
-mod counter;
+mod mcp;
 
 const BIND_ADDRESS: &str = "127.0.0.1:8000";
 
