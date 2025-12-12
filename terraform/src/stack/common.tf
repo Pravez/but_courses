@@ -1,13 +1,13 @@
 resource "random_password" "password" {
-  length = 32
-  special          = true
-  upper            = true
-  lower            = true
-  numeric          = true
-  min_upper        = 1
-  min_lower        = 1
-  min_numeric      = 1
-  min_special      = 1
+  length      = 32
+  special     = true
+  upper       = true
+  lower       = true
+  numeric     = true
+  min_upper   = 1
+  min_lower   = 1
+  min_numeric = 1
+  min_special = 1
   # Exclude characters that might cause issues in some contexts
   override_special = "!@#$%^&*()_+-=[]{}|;:,.<>?"
 }
@@ -39,4 +39,11 @@ resource "scaleway_secret" "database_secret" {
 resource "scaleway_secret_version" "database_secret_version" {
   secret_id = scaleway_secret.database_secret.id
   data      = random_password.password.result
+}
+
+resource "scaleway_rdb_privilege" "privilege" {
+  instance_id   = scaleway_rdb_instance.instance.id
+  user_name     = scaleway_rdb_instance.instance.user_name
+  database_name = scaleway_rdb_database.db.name
+  permission    = "all"
 }

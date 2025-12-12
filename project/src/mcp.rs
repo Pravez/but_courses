@@ -1,6 +1,3 @@
-#![allow(dead_code)]
-use std::sync::Arc;
-
 use rmcp::{
     ErrorData as McpError, RoleServer, ServerHandler,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
@@ -9,15 +6,7 @@ use rmcp::{
     service::RequestContext,
     tool, tool_handler, tool_router,
 };
-use sqlx::{AnyPool, Error, PgPool, Row};
-use sqlx::postgres::PgRow;
-use tokio::sync::Mutex;
-
-#[derive(Debug, serde::Deserialize, schemars::JsonSchema)]
-pub struct StructRequest {
-    pub a: i32,
-    pub b: i32,
-}
+use sqlx::{PgPool};
 
 #[derive(sqlx::FromRow)]
 struct TableRecord {

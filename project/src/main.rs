@@ -1,4 +1,4 @@
-use rmcp::transport::sse_server::{SseServer, SseServerConfig};
+use rmcp::transport::sse_server::{SseServer};
 use sqlx::postgres::PgPoolOptions;
 use tracing_subscriber::{
     layer::SubscriberExt,
