@@ -10,7 +10,7 @@ import argparse
 import sys
 import asyncio
 from datetime import datetime, timedelta
-from typing import List, Tuple
+from typing import List
 from faker import Faker
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
@@ -21,21 +21,81 @@ fake = Faker()
 
 # Computer Science courses with descriptions
 CS_COURSES = [
-    ("Introduction to Python Programming", "Learn Python fundamentals, data structures, and object-oriented programming", 3),
-    ("Advanced JavaScript and Node.js", "Master modern JavaScript, async programming, and backend development with Node.js", 4),
-    ("Data Structures and Algorithms", "Deep dive into algorithms, complexity analysis, and efficient data structures", 4),
-    ("Web Development with React", "Build modern web applications using React, hooks, and state management", 3),
-    ("Machine Learning Fundamentals", "Introduction to ML algorithms, neural networks, and practical implementations", 4),
-    ("Database Design and SQL", "Learn relational database design, SQL queries, and optimization techniques", 3),
-    ("Cloud Computing with AWS", "Explore AWS services, serverless architecture, and cloud deployment strategies", 3),
-    ("Cybersecurity Essentials", "Understanding security principles, encryption, and ethical hacking basics", 3),
-    ("Mobile App Development", "Create native and cross-platform mobile applications using React Native", 4),
-    ("DevOps and CI/CD Pipelines", "Master Docker, Kubernetes, Jenkins, and automated deployment workflows", 3),
-    ("Artificial Intelligence with TensorFlow", "Build AI models using TensorFlow, deep learning, and computer vision", 4),
-    ("Blockchain and Smart Contracts", "Learn blockchain technology, Ethereum, and Solidity programming", 3),
-    ("Full Stack Development", "End-to-end web development covering frontend, backend, and databases", 4),
-    ("System Design and Architecture", "Learn scalable system design, microservices, and distributed systems", 4),
-    ("Natural Language Processing", "Process and analyze text data using NLP techniques and transformer models", 3),
+    (
+        "Introduction to Python Programming",
+        "Learn Python fundamentals, data structures, and object-oriented programming",
+        3,
+    ),
+    (
+        "Advanced JavaScript and Node.js",
+        "Master modern JavaScript, async programming, and backend development with Node.js",
+        4,
+    ),
+    (
+        "Data Structures and Algorithms",
+        "Deep dive into algorithms, complexity analysis, and efficient data structures",
+        4,
+    ),
+    (
+        "Web Development with React",
+        "Build modern web applications using React, hooks, and state management",
+        3,
+    ),
+    (
+        "Machine Learning Fundamentals",
+        "Introduction to ML algorithms, neural networks, and practical implementations",
+        4,
+    ),
+    (
+        "Database Design and SQL",
+        "Learn relational database design, SQL queries, and optimization techniques",
+        3,
+    ),
+    (
+        "Cloud Computing with AWS",
+        "Explore AWS services, serverless architecture, and cloud deployment strategies",
+        3,
+    ),
+    (
+        "Cybersecurity Essentials",
+        "Understanding security principles, encryption, and ethical hacking basics",
+        3,
+    ),
+    (
+        "Mobile App Development",
+        "Create native and cross-platform mobile applications using React Native",
+        4,
+    ),
+    (
+        "DevOps and CI/CD Pipelines",
+        "Master Docker, Kubernetes, Jenkins, and automated deployment workflows",
+        3,
+    ),
+    (
+        "Artificial Intelligence with TensorFlow",
+        "Build AI models using TensorFlow, deep learning, and computer vision",
+        4,
+    ),
+    (
+        "Blockchain and Smart Contracts",
+        "Learn blockchain technology, Ethereum, and Solidity programming",
+        3,
+    ),
+    (
+        "Full Stack Development",
+        "End-to-end web development covering frontend, backend, and databases",
+        4,
+    ),
+    (
+        "System Design and Architecture",
+        "Learn scalable system design, microservices, and distributed systems",
+        4,
+    ),
+    (
+        "Natural Language Processing",
+        "Process and analyze text data using NLP techniques and transformer models",
+        3,
+    ),
 ]
 
 # Class information
@@ -83,14 +143,39 @@ async def create_database(engine: AsyncEngine, is_pg: bool):
 
     async with engine.begin() as conn:
         # Drop existing tables if they exist
-        await conn.execute(text("DROP TABLE IF EXISTS enrollments CASCADE" if is_pg else "DROP TABLE IF EXISTS enrollments"))
-        await conn.execute(text("DROP TABLE IF EXISTS students CASCADE" if is_pg else "DROP TABLE IF EXISTS students"))
-        await conn.execute(text("DROP TABLE IF EXISTS courses CASCADE" if is_pg else "DROP TABLE IF EXISTS courses"))
-        await conn.execute(text("DROP TABLE IF EXISTS classes CASCADE" if is_pg else "DROP TABLE IF EXISTS classes"))
+        await conn.execute(
+            text(
+                "DROP TABLE IF EXISTS enrollments CASCADE"
+                if is_pg
+                else "DROP TABLE IF EXISTS enrollments"
+            )
+        )
+        await conn.execute(
+            text(
+                "DROP TABLE IF EXISTS students CASCADE"
+                if is_pg
+                else "DROP TABLE IF EXISTS students"
+            )
+        )
+        await conn.execute(
+            text(
+                "DROP TABLE IF EXISTS courses CASCADE"
+                if is_pg
+                else "DROP TABLE IF EXISTS courses"
+            )
+        )
+        await conn.execute(
+            text(
+                "DROP TABLE IF EXISTS classes CASCADE"
+                if is_pg
+                else "DROP TABLE IF EXISTS classes"
+            )
+        )
 
         # Create classes table
         if is_pg:
-            await conn.execute(text("""
+            await conn.execute(
+                text("""
                 CREATE TABLE classes (
                     id SERIAL PRIMARY KEY,
                     class_code VARCHAR(50) UNIQUE NOT NULL,
@@ -98,9 +183,11 @@ async def create_database(engine: AsyncEngine, is_pg: bool):
                     start_date DATE NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
-            """))
+            """)
+            )
         else:
-            await conn.execute(text("""
+            await conn.execute(
+                text("""
                 CREATE TABLE classes (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     class_code VARCHAR(50) UNIQUE NOT NULL,
@@ -108,11 +195,13 @@ async def create_database(engine: AsyncEngine, is_pg: bool):
                     start_date DATE NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
-            """))
+            """)
+            )
 
         # Create courses table
         if is_pg:
-            await conn.execute(text("""
+            await conn.execute(
+                text("""
                 CREATE TABLE courses (
                     id SERIAL PRIMARY KEY,
                     course_name VARCHAR(100) NOT NULL,
@@ -120,9 +209,11 @@ async def create_database(engine: AsyncEngine, is_pg: bool):
                     credits INTEGER NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
-            """))
+            """)
+            )
         else:
-            await conn.execute(text("""
+            await conn.execute(
+                text("""
                 CREATE TABLE courses (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     course_name VARCHAR(100) NOT NULL,
@@ -130,11 +221,13 @@ async def create_database(engine: AsyncEngine, is_pg: bool):
                     credits INTEGER NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
-            """))
+            """)
+            )
 
         # Create students table
         if is_pg:
-            await conn.execute(text("""
+            await conn.execute(
+                text("""
                 CREATE TABLE students (
                     id SERIAL PRIMARY KEY,
                     student_id VARCHAR(20) UNIQUE NOT NULL,
@@ -148,9 +241,11 @@ async def create_database(engine: AsyncEngine, is_pg: bool):
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (class_id) REFERENCES classes(id)
                 )
-            """))
+            """)
+            )
         else:
-            await conn.execute(text("""
+            await conn.execute(
+                text("""
                 CREATE TABLE students (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     student_id VARCHAR(20) UNIQUE NOT NULL,
@@ -164,11 +259,13 @@ async def create_database(engine: AsyncEngine, is_pg: bool):
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (class_id) REFERENCES classes(id)
                 )
-            """))
+            """)
+            )
 
         # Create enrollments table
         if is_pg:
-            await conn.execute(text("""
+            await conn.execute(
+                text("""
                 CREATE TABLE enrollments (
                     id SERIAL PRIMARY KEY,
                     student_id INTEGER NOT NULL,
@@ -181,9 +278,11 @@ async def create_database(engine: AsyncEngine, is_pg: bool):
                     FOREIGN KEY (course_id) REFERENCES courses(id),
                     UNIQUE(student_id, course_id)
                 )
-            """))
+            """)
+            )
         else:
-            await conn.execute(text("""
+            await conn.execute(
+                text("""
                 CREATE TABLE enrollments (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     student_id INTEGER NOT NULL,
@@ -196,7 +295,8 @@ async def create_database(engine: AsyncEngine, is_pg: bool):
                     FOREIGN KEY (course_id) REFERENCES courses(id),
                     UNIQUE(student_id, course_id)
                 )
-            """))
+            """)
+            )
 
 
 async def insert_classes(engine: AsyncEngine, is_pg: bool) -> List[int]:
@@ -212,7 +312,13 @@ async def insert_classes(engine: AsyncEngine, is_pg: bool) -> List[int]:
                         VALUES (:code, :name, :date)
                         RETURNING id
                     """),
-                    {"code": class_code, "name": class_name, "date": datetime.strptime(start_date, '%Y-%m-%d').date() if isinstance(start_date, str) else start_date}
+                    {
+                        "code": class_code,
+                        "name": class_name,
+                        "date": datetime.strptime(start_date, "%Y-%m-%d").date()
+                        if isinstance(start_date, str)
+                        else start_date,
+                    },
                 )
                 class_ids.append(result.fetchone()[0])
             else:
@@ -221,7 +327,7 @@ async def insert_classes(engine: AsyncEngine, is_pg: bool) -> List[int]:
                         INSERT INTO classes (class_code, class_name, start_date)
                         VALUES (:code, :name, :date)
                     """),
-                    {"code": class_code, "name": class_name, "date": start_date}
+                    {"code": class_code, "name": class_name, "date": start_date},
                 )
                 class_ids.append(result.lastrowid)
 
@@ -242,7 +348,7 @@ async def insert_courses(engine: AsyncEngine, is_pg: bool) -> List[int]:
                         VALUES (:name, :desc, :credits)
                         RETURNING id
                     """),
-                    {"name": course_name, "desc": description, "credits": credits}
+                    {"name": course_name, "desc": description, "credits": credits},
                 )
                 course_ids.append(result.fetchone()[0])
             else:
@@ -251,7 +357,7 @@ async def insert_courses(engine: AsyncEngine, is_pg: bool) -> List[int]:
                         INSERT INTO courses (course_name, description, credits)
                         VALUES (:name, :desc, :credits)
                     """),
-                    {"name": course_name, "desc": description, "credits": credits}
+                    {"name": course_name, "desc": description, "credits": credits},
                 )
                 course_ids.append(result.lastrowid)
 
@@ -266,7 +372,9 @@ def generate_student_id() -> str:
     return f"STU{year}{number}"
 
 
-async def insert_students(engine: AsyncEngine, class_ids: List[int], students_per_class: int, is_pg: bool) -> List[int]:
+async def insert_students(
+    engine: AsyncEngine, class_ids: List[int], students_per_class: int, is_pg: bool
+) -> List[int]:
     """Insert student data into the database."""
     student_ids = []
     used_student_codes = set()
@@ -293,15 +401,19 @@ async def insert_students(engine: AsyncEngine, class_ids: List[int], students_pe
                         break
 
                 # Generate date of birth (18-25 years old)
-                days_old = random.randint(18*365, 25*365)
-                date_of_birth = (datetime.now() - timedelta(days=days_old)).strftime('%Y-%m-%d')
+                days_old = random.randint(18 * 365, 25 * 365)
+                date_of_birth = (datetime.now() - timedelta(days=days_old)).strftime(
+                    "%Y-%m-%d"
+                )
 
                 # Generate GPA (2.0 - 4.0)
                 gpa = round(random.uniform(2.0, 4.0), 2)
 
                 # Enrollment date within the last year
                 enrollment_days_ago = random.randint(0, 365)
-                enrollment_date = (datetime.now() - timedelta(days=enrollment_days_ago)).strftime('%Y-%m-%d')
+                enrollment_date = (
+                    datetime.now() - timedelta(days=enrollment_days_ago)
+                ).strftime("%Y-%m-%d")
 
                 if is_pg:
                     result = await conn.execute(
@@ -312,10 +424,17 @@ async def insert_students(engine: AsyncEngine, class_ids: List[int], students_pe
                             RETURNING id
                         """),
                         {
-                            "sid": student_id, "fname": first_name, "lname": last_name,
-                            "email": email, "dob": datetime.strptime(date_of_birth, '%Y-%m-%d').date(), "cid": class_id,
-                            "gpa": gpa, "edate": datetime.strptime(enrollment_date, '%Y-%m-%d').date()
-                        }
+                            "sid": student_id,
+                            "fname": first_name,
+                            "lname": last_name,
+                            "email": email,
+                            "dob": datetime.strptime(date_of_birth, "%Y-%m-%d").date(),
+                            "cid": class_id,
+                            "gpa": gpa,
+                            "edate": datetime.strptime(
+                                enrollment_date, "%Y-%m-%d"
+                            ).date(),
+                        },
                     )
                     student_ids.append(result.fetchone()[0])
                 else:
@@ -326,10 +445,15 @@ async def insert_students(engine: AsyncEngine, class_ids: List[int], students_pe
                             VALUES (:sid, :fname, :lname, :email, :dob, :cid, :gpa, :edate)
                         """),
                         {
-                            "sid": student_id, "fname": first_name, "lname": last_name,
-                            "email": email, "dob": date_of_birth, "cid": class_id,
-                            "gpa": gpa, "edate": enrollment_date
-                        }
+                            "sid": student_id,
+                            "fname": first_name,
+                            "lname": last_name,
+                            "email": email,
+                            "dob": date_of_birth,
+                            "cid": class_id,
+                            "gpa": gpa,
+                            "edate": enrollment_date,
+                        },
                     )
                     student_ids.append(result.lastrowid)
 
@@ -337,10 +461,12 @@ async def insert_students(engine: AsyncEngine, class_ids: List[int], students_pe
     return student_ids
 
 
-async def insert_enrollments(engine: AsyncEngine, student_ids: List[int], course_ids: List[int]) -> int:
+async def insert_enrollments(
+    engine: AsyncEngine, student_ids: List[int], course_ids: List[int]
+) -> int:
     """Insert enrollment data (students enrolled in courses)."""
-    grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D', None]
-    statuses = ['active', 'active', 'active', 'active', 'completed', 'completed']
+    grades = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", None]
+    statuses = ["active", "active", "active", "active", "completed", "completed"]
 
     enrollment_count = 0
 
@@ -353,11 +479,13 @@ async def insert_enrollments(engine: AsyncEngine, student_ids: List[int], course
             for course_id in selected_courses:
                 # Enrollment date within the last 6 months
                 enrollment_days_ago = random.randint(0, 180)
-                enrollment_date = (datetime.now() - timedelta(days=enrollment_days_ago)).strftime('%Y-%m-%d')
+                enrollment_date = (
+                    datetime.now() - timedelta(days=enrollment_days_ago)
+                ).strftime("%Y-%m-%d")
 
                 status = random.choice(statuses)
                 # Only completed courses have grades
-                grade = random.choice(grades) if status == 'completed' else None
+                grade = random.choice(grades) if status == "completed" else None
 
                 try:
                     await conn.execute(
@@ -366,9 +494,16 @@ async def insert_enrollments(engine: AsyncEngine, student_ids: List[int], course
                             VALUES (:sid, :cid, :edate, :grade, :status)
                         """),
                         {
-                            "sid": student_id, "cid": course_id, "edate": datetime.strptime(enrollment_date, '%Y-%m-%d').date() if "postgresql" in str(conn.engine.url) else enrollment_date,
-                            "grade": grade, "status": status
-                        }
+                            "sid": student_id,
+                            "cid": course_id,
+                            "edate": datetime.strptime(
+                                enrollment_date, "%Y-%m-%d"
+                            ).date()
+                            if "postgresql" in str(conn.engine.url)
+                            else enrollment_date,
+                            "grade": grade,
+                            "status": status,
+                        },
                     )
                     enrollment_count += 1
                 except IntegrityError:
@@ -381,9 +516,9 @@ async def insert_enrollments(engine: AsyncEngine, student_ids: List[int], course
 
 async def print_statistics(engine: AsyncEngine):
     """Print database statistics."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("DATABASE STATISTICS")
-    print("="*60)
+    print("=" * 60)
 
     async with engine.connect() as conn:
         # Classes
@@ -404,45 +539,53 @@ async def print_statistics(engine: AsyncEngine):
 
         # Students per class
         print("\nStudents per class:")
-        result = await conn.execute(text("""
+        result = await conn.execute(
+            text("""
             SELECT c.class_code, c.class_name, COUNT(s.id) as student_count
             FROM classes c
             LEFT JOIN students s ON c.id = s.class_id
             GROUP BY c.id, c.class_code, c.class_name
-        """))
+        """)
+        )
         for row in result:
             print(f"  {row[0]} ({row[1]}): {row[2]} students")
 
         # Average GPA per class
         print("\nAverage GPA per class:")
-        result = await conn.execute(text("""
+        result = await conn.execute(
+            text("""
             SELECT c.class_code, ROUND(AVG(s.gpa)::numeric, 2) as avg_gpa
             FROM classes c
             LEFT JOIN students s ON c.id = s.class_id
             GROUP BY c.id, c.class_code
-        """) if "postgresql" in str(engine.url) else text("""
+        """)
+            if "postgresql" in str(engine.url)
+            else text("""
             SELECT c.class_code, ROUND(AVG(s.gpa), 2) as avg_gpa
             FROM classes c
             LEFT JOIN students s ON c.id = s.class_id
             GROUP BY c.id
-        """))
+        """)
+        )
         for row in result:
             print(f"  {row[0]}: {row[1]}")
 
         # Most popular courses
         print("\nTop 5 most popular courses:")
-        result = await conn.execute(text("""
+        result = await conn.execute(
+            text("""
             SELECT c.course_name, COUNT(e.id) as enrollment_count
             FROM courses c
             LEFT JOIN enrollments e ON c.id = e.course_id
             GROUP BY c.id, c.course_name
             ORDER BY enrollment_count DESC
             LIMIT 5
-        """))
+        """)
+        )
         for row in result:
             print(f"  {row[0]}: {row[1]} enrollments")
 
-    print("="*60)
+    print("=" * 60)
 
 
 async def check_tables_exist(engine: AsyncEngine, is_pg: bool) -> bool:
@@ -455,21 +598,25 @@ async def check_tables_exist(engine: AsyncEngine, is_pg: bool) -> bool:
         async with engine.connect() as conn:
             if is_pg:
                 # Fetch all public tables and check set inclusion to avoid driver-specific array binding quirks
-                result = await conn.execute(text(
-                    """
+                result = await conn.execute(
+                    text(
+                        """
                     SELECT table_name
                     FROM information_schema.tables
                     WHERE table_schema = 'public'
                     """
-                ))
+                    )
+                )
             else:
-                result = await conn.execute(text(
-                    """
+                result = await conn.execute(
+                    text(
+                        """
                     SELECT name as table_name
                     FROM sqlite_master
                     WHERE type='table'
                     """
-                ))
+                    )
+                )
 
             found = {row[0] for row in result}
             return required.issubset(found)
@@ -480,9 +627,9 @@ async def check_tables_exist(engine: AsyncEngine, is_pg: bool) -> bool:
 
 async def async_main(db_connection: str, students_per_class: int):
     """Async main function to generate the database."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SCHOOL DATABASE GENERATOR")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     # Normalize connection string
     connection_string = normalize_connection_string(db_connection)
@@ -499,10 +646,12 @@ async def async_main(db_connection: str, students_per_class: int):
 
         # If all tables already exist, only print statistics
         if await check_tables_exist(engine, is_pg):
-            print("Existing database detected. Tables already present. Showing statistics only...\n")
+            print(
+                "Existing database detected. Tables already present. Showing statistics only...\n"
+            )
             await print_statistics(engine)
             await engine.dispose()
-            print(f"\n✓ Statistics displayed. No changes made.")
+            print("\n✓ Statistics displayed. No changes made.")
             print(f"✓ Connection string: {connection_string}\n")
             return
 
@@ -514,7 +663,9 @@ async def async_main(db_connection: str, students_per_class: int):
         # Insert data
         class_ids = await insert_classes(engine, is_pg)
         course_ids = await insert_courses(engine, is_pg)
-        student_ids = await insert_students(engine, class_ids, students_per_class, is_pg)
+        student_ids = await insert_students(
+            engine, class_ids, students_per_class, is_pg
+        )
         await insert_enrollments(engine, student_ids, course_ids)
 
         # Print statistics
@@ -523,7 +674,7 @@ async def async_main(db_connection: str, students_per_class: int):
         # Close engine
         await engine.dispose()
 
-        print(f"\n✓ Database populated successfully!")
+        print("\n✓ Database populated successfully!")
         print(f"✓ Connection string: {connection_string}\n")
 
     except Exception as e:
@@ -534,7 +685,7 @@ async def async_main(db_connection: str, students_per_class: int):
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description='Generate a school management database with fake data',
+        description="Generate a school management database with fake data",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -548,27 +699,28 @@ Examples:
 
   # Custom students per class
   %(prog)s school.db --students-per-class 50
-        """
+        """,
     )
 
     parser.add_argument(
-        'database',
+        "database",
         type=str,
-        help='Database connection string (e.g., postgresql+asyncpg://user:pass@host/db or file.db for SQLite)'
+        help="Database connection string (e.g., postgresql+asyncpg://user:pass@host/db or file.db for SQLite)",
     )
 
     parser.add_argument(
-        '--students-per-class',
+        "--students-per-class",
         type=int,
         default=30,
-        metavar='N',
-        help='Number of students per class (default: 30)'
+        metavar="N",
+        help="Number of students per class (default: 30)",
     )
 
     args = parser.parse_args()
 
     # Run async main
     asyncio.run(async_main(args.database, args.students_per_class))
+
 
 if __name__ == "__main__":
     main()

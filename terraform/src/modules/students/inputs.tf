@@ -13,3 +13,7 @@ variable "project_id" {
 variable "global_project_id" {
   type = string
 }
+
+variable "group_id" {
+  type = string
+}

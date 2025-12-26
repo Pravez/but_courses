@@ -1,0 +1,21 @@
+[project]
+name = "assessments"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "langchain>=1.2.0",
+    "langchain-mistralai>=1.1.1",
+    "langsmith>=0.4.59",
+    "polars>=1.36.1",
+    "pydantic>=2.12.5",
+    "typer>=0.20.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+assessments = "assessments.app:app"
