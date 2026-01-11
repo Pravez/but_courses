@@ -8,7 +8,9 @@ Votre MCP est un code Rust qui utilise la bibliothèque officielle Rust #link("h
 
 L'application MCP est déjà dockerisée, il ne vous reste qu'à la déployer dans votre registry Scaleway. Première étape, déployer votre image dans votre registry Scaleway. Rendez-vous en ligne sur la console Scaleway pour trouver votre `Container Registry` (qui devrait démarrer par _funcscw..._). Sur celui-ci, vous trouverez suffisamment d'informations pour vous authentifier et déployer votre image. Une fois ces informations trouvées, rendez-vous donc dans le dossier `project`, qui contient le code source de votre MCP et son `Dockerfile`.
 
-#utils.consigne[A l'aide de la commande `docker login` et `docker build`, déployez votre image dans votre registry Scaleway. N'oubliez pas de tagger votre image suivant votre registry, et de lui donner un nom qui vous est propre (par exemple, en rajoutant votre nom/prénom dans l'image : encore une fois vous partagez ce registry avec tous les autres étudiants).]
+Attention à votre installation Docker ! Si la commande `docker ps` vous retourne une erreur, il est probable que votre utilisateur ne soit pas dans le groupe `docker`. Soit vous utilisez `sudo docker` pour toutes vos commandes Docker, soit vous #link("https://docs.docker.com/engine/install/linux-postinstall")[devez ajouter votre utilisateur au groupe] `docker`.
+
+#utils.consigne[A l'aide de la commande `docker login` et `docker build`, déployez votre image dans votre registry Scaleway. N'oubliez pas de nommer votre image suivant votre registry (c'est à dire `<registry>/<image>:<tag>`), et de lui donner un nom d'image qui vous est propre (par exemple, en rajoutant votre nom/prénom dans l'image ; vous partagez ce registry avec tous les autres étudiants).]
 
 Rust est un langage compilé, entre autres intéressant pour ses performances et sa sécurité. Un de ses défauts cependant réside dans ses dépendances de compilation, qui peuvent vite s'avérer être lourdes (en termes de stockage). Le `Container Registry` vous est facturé au temps mais aussi au stockage, il est donc important de réduire au maximum la taille de vos images.
 
@@ -58,6 +60,12 @@ Une fois le code écrit, il ne vous reste plus qu'à exécuter la commande `terr
 
 Allez regarder dans l'interface ! Dans la section Serverless Containers trouvez votre namespace, votre container, et constatez votre déploiement en cours.]
 
-#utils.question(num: 6)[Utilisez les logs de votre conteneur (Onglet "Logs" > "Open Grafana logs dashboard") pour vérifier que votre MCP tourne. Pourquoi celui-ci ne démarre-t-il pas ? Citez le log Grafana qui vous a permis de le détecter.]
+#utils.encart(title: "Grafana Logs", type: "info")[Les logs de votre conteneur sont disponibles dans l'onglet "Logs" > "Open Grafana logs dashboard". Vous pouvez y voir les logs de votre conteneur, et les filtrer par niveau de log (debug, info, warning, error). Vous pouvez également y voir les métriques de votre conteneur (usage CPU, RAM, etc.).
+
+Il est possible que les logs de votre conteneur ne s'affichent pas immédiatement. Si les logs ne finissent décidément par ne jamais s'afficher, vous pouvez supprimer le conteneur et le recréer, ou directement aller lire le code Rust pour en déduire la réponse à la question suivante (question 6).]
+
+#utils.encart(title: "Pour aller plus vite avec les Serverless Containers", type: "info")[Si jamais votre container ne démarre pas, Terraform restera bloqué jusqu'à 10 minutes avant de couper. Les logs vous permettant de constater très vite un éventuel échec, vous n'avez pas besoin d'attendre autant de temps. Vous pouvez sur votre interface détruire directement le conteneur qui tente de démarrer, puis faire un CTRL-C dans votre terminal pour couper Terraform (ce qui est temps normal *formellement proscrit*, et à n'utiliser que dans ce cas très précis).]
+
+#utils.question(num: 6)[Utilisez les logs de votre conteneur pour vérifier que votre MCP tourne. Pourquoi celui-ci ne démarre-t-il pas ? Citez le log Grafana qui vous a permis de le détecter.]
 
 #pagebreak()

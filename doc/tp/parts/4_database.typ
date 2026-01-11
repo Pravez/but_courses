@@ -43,8 +43,6 @@ postgres://<username>:<password>@<host>:<port>/<database>
 
 #utils.consigne[Dans un bloc #link("https://developer.hashicorp.com/terraform/language/block/locals")[`locals`], créez une variable `database_url` avec la valeur de votre _connection_string_. Faites en sorte que chaque composante de cette variable (username, password, ...) soit extraite depuis vos ressources Terraform (donc rien en dur). Puis, ajustez les variables d'environnement de votre conteneur via Terraform, et relancez votre conteneur grâce au `terraform apply`.]
 
-#utils.encart(title: "Pour aller plus vite avec les Serverless Containers", type: "info")[Si jamais votre container ne démarre pas, Terraform restera bloqué jusqu'à 10 minutes avant de couper. Les logs vous permettant de constater très vite un éventuel échec, vous n'avez pas besoin d'attendre autant de temps. Vous pouvez sur votre interface détruire directement le conteneur qui tente de démarrer, puis faire un CTRL-C dans votre terminal pour couper Terraform (ce qui est temps normal *formellement proscrit*, et à n'utiliser que dans ce cas très précis).]
-
 Votre MCP est maintenant en mesure de se connecter à la base, et est 100% opérationnel ! Pour regarder les `tools` qu'il expose, vous pouvez utiliser l'outil dédié #link("https://github.com/modelcontextprotocol/inspector")[MCP Inspector]. Pour le lancer, rien de plus simple : ouvrez un terminal et lancez la commande (attention à avoir installé `npm` et `node`):
 ```bash
 > npx @modelcontextprotocol/inspector

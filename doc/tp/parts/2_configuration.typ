@@ -17,7 +17,7 @@ Il n'y a pas de prérequis spécifique pour les méthodes d'installation ni pour
 
 Une fois l'ensemble installé, il est temps d'initialiser votre projet Terraform. Téléchargez les sources du TP, puis rendez-vous dans le dossier `terraform/src/stack`.
 
-#utils.consigne[Exécutez la commande `terraform init` pour initialiser votre projet.]
+#utils.consigne[Exécutez la commande `terraform init` pour initialiser votre projet Terraform. Puis, pour créer votre état Terraform initial, faites un `terraform plan`.]
 
 #utils.question(num: 1)[Que remarquez-vous ? Manque-t-il quelque chose ?]
 
@@ -36,7 +36,7 @@ Pour démarrer la configuration, il va d'abord vous falloir créer un jeton d'ac
 )
 
 La popup qui va suivre vous permettra d'obtenir votre `access_key` et votre `secret_key`.
-#utils.consigne[Utilisez ces informations pour corriger l'initialisation de votre projet, et relancez la commande `terraform init`.]
+#utils.consigne[Utilisez ces informations pour corriger l'initialisation de votre projet, et lancez la commande `terraform init` puis `terraform apply` (et validez les changements proposés par Terraform).]
 #utils.question(num: 2)[Qu'a créé Terraform ? Où se situe votre `state` ? Comment faire si vous souhaitez coder à plusieurs ? (aidez-vous de la #link("https://registry.terraform.io/providers/scaleway/scaleway/latest/docs")[documentation Terraform du provider Scaleway], partie "Guides")]
 #utils.question(num: 3)[Expliquez la notion de *state locking* de Terraform et le lien avec la question précédente.]
 
