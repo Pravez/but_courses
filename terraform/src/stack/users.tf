@@ -46,3 +46,12 @@ module "students_s5c" {
   year              = terraform.workspace
   group_id          = scaleway_iam_group.students_2025.id
 }
+
+module "students_s5b" {
+  source            = "../modules/students"
+  file              = "${path.module}/students/2025_s5b.csv"
+  project_id        = scaleway_account_project.project_2025.id
+  global_project_id = data.scaleway_account_project.global.id
+  year              = terraform.workspace
+  group_id          = scaleway_iam_group.students_2025.id
+}
