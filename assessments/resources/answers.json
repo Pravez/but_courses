@@ -1,0 +1,121 @@
+{
+  "global_context": "Tu es un assistant pédagogique expert en Cloud et DevOps enseignant en BUT Informatique. Ton rôle est de corriger des comptes-rendus de TP d'un module de 6h sur Terraform.\n\nLe contexte du TP est le suivant :\n- Infrastructure : Scaleway.\n- Objectif : Déployer un conteneur Docker hébergeant un serveur MCP (Model Context Protocol).\n- Fonctionnement : Ce serveur MCP doit se connecter à une base de données et permettre à l'agent \"Mistral LeChat\" d'interroger cette base.\n- Livrables : L'étudiant fournit des réponses conceptuelles sur ses actions et le code Terraform produit.",
+  "terraform_criterias": [
+    {
+      "name": "container",
+      "criteria": "Le Terraform doit contenir une ressource 'scaleway_container', avec les propriétés suivantes : cpu_limit à 100 et memory_limit à 256"
+    },
+    {
+      "name": "registry",
+      "criteria": "Le Terraform doit contenir un data 'scaleway_container_namespace' et un data 'scaleway_registry_image'. Plus de points si le data dépend du 'terraform_remote_state' que si c'est un data statique (valeurs en dur)."
+    },
+    {
+      "name": "container_image",
+      "criteria": "L'attribut 'registry_image' du 'scaleway_container' doit être défini en fonction du container namespace et du registry image. Par exemple \"${data.scaleway_container_namespace.namespace.registry_endpoint}/${data.scaleway_registry_image.image.name}:[TAG]\" (pas de problème si le tag ne dépend pas d'une ressource/data terraform, ou est en dur)"
+    },
+    {
+      "name": "database",
+      "criteria": "Le terraform doit contenir un data 'scaleway_rdb_instance'. Plus de points s'il dépend du 'terraform_remote_state' que si c'est un data statique (valeurs en dur)."
+    },
+    {
+      "name": "database_users",
+      "criteria": "Le terraform doit contenir au moins un utilisateur qui correspond à l'élève."
+    },
+    {
+      "name": "database_connection_string",
+      "criteria": "Le terraform doit contenir un bloc 'locals' qui contient la connection_string pour se connecter à la base PostgreSQL. Bonus si elle est construite à partir d'une ressource 'scaleway_rdb_instance' et d'un secret Scaleway, d'un random_password, ou d'un utilisateur 'scaleway_rdb_user'."
+    },
+    {
+      "name": "container_database_connection",
+      "criteria": "Le terraform doit contenir une ressource 'scaleway_container' qui se connecte à la base PostgreSQL. La connection string doit être fournie en 'environment_variables' du container (bonus si fournie en 'secret_environment_variables')."
+    },
+    {
+      "name": "database_users_privileges",
+      "criteria": "Le terraform doit contenir une ou plusieurs ressources 'scaleway_rdb_privilege' avec la permission 'all'. Bonus s'il y a un deuxième utilisateur qui a la permission 'readonly'."
+    }
+  ],
+  "1": {
+    "context": "Début du TP, l'élève vient de télécharger le code du TP et de faire son premier terraform init/plan. Il manque les clés d'API Scaleway dans son code. Il vient d'éxecuter la commande terraform init et terraform plan",
+    "question": "Que remarquez-vous ? Manque-t-il quelque chose ?",
+    "answer": "L'élève devrait répondre qu'il manque de quoi se connecter à Scaleway, que ce soit des clés d'API ou autre. Terraform doit lui dire d'une manière ou d'une autre. S'il a répondu que tout s'était bien passé, donne lui les points quand même.",
+    "coefficient": 1
+  },
+  "2": {
+    "context": "L'élève a fait son premier terraform init/apply après avoir ajouté ses clés d'API Scaleway",
+    "question": "Qu’a créé Terraform ? Où se situe votre state ? Comment faire si vous souhaitez coder à plusieurs ? (aidez-vous de la documentation Terraform du provider Scaleway , partie “Guides”)",
+    "answer": "L'élève doit dire que Terraform a créé un répertoire .terraform et un fichier .tfstate. L'élève devrait dire que pour coder à plusieurs, il faut utiliser un backend Terraform différent pour stocker son state à distance (S3, PostgreSQL).",
+    "coefficient": 1
+  },
+  "3": {
+    "context": "L'élève a fait son premier terraform apply après avoir ajouté ses clés d'API Scaleway",
+    "question": "Expliquez la notion de state locking de Terraform et le lien avec la question précédente.",
+    "answer": "Avec ses mots, l'élève doit expliquer que le state locking est une fonctionnalité de Terraform qui permet de bloquer le state lorsqu'il est en cours de modification. Cela permet d'éviter les conflits entre plusieurs utilisateurs qui modifient le même state en même temps. Le lien avec la question précédente est que pour coder à plusieurs, il faut utiliser un backend Terraform différent pour stocker son state à distance, car le state locking ne fonctionne pas avec le state local (expliquer le lien avec la question précédente est optionnel).",
+    "coefficient": 1
+  },
+  "4": {
+    "context": "L'élève vient de construire une image Docker avec un Dockerfile et un multi-stage pour son serveur MCP.",
+    "question": "Comment fonctionne le multi-stage ? De combien de Mégaoctets avez-vous réussi à réduire la taille de votre image ?",
+    "answer": "Le multi-stage permet de diviser le Dockerfile en plusieurs étapes, en utilisant une image de base pour chaque étape. Cela permet de réduire la taille de l'image finale en ne gardant que les fichiers nécessaires pour chaque étape. L'élève doit expliquer comment cela fonctionne et donner le nombre de Mégaoctets réduit. Il faut que la réduction soit vraiment notable (du genre 1.6Go vers 100Mo, en tout cas de cet ordre d'idée).",
+    "coefficient": 1
+  },
+  "5": {
+    "context": "L'élève doit estimer le coût de fonctionnement de son image via la UI Scaleway. C'est du Rust, il doit donc prendre les valeurs les plus faibles en CPU et RAM.",
+    "question": "En prenant en compte l’extrême efficacité CPU et RAM de Rust, quelles sont les ressources nécessaires pour faire tourner votre MCP ? Quel est le coût mensuel associé pour une disponibilité sans interruptions ?",
+    "answer": "L'élève doit prendre les valeurs les plus faibles : 100 mVCPU et 128Mo de RAM (c'est pas grave s'il prend 256Mo de RAM). Le conteneur doit coûter approximativement 3€ par mois pour une disponibilité sans interruptions (~2.9565€).",
+    "coefficient": 1
+  },
+  "6": {
+    "context": "L'élève a réussi à déployer son image Docker, il tente maintenant de la démarrer, sauf que l'image a besoin d'une base de données dont la connexion se fait via une variable d'environnement, dont il n'a pas encore été dit à l'élève de la fournir.",
+    "question": "Utilisez les logs de votre conteneur pour vérifier que votre MCP tourne. Pourquoi celui-ci\nne démarre-t-il pas ? Citez le log Grafana qui vous a permis de le détecter.",
+    "answer": "L'élève doit citer des logs (DATABASE_URL must be set: NotPresent) ou dire que c'est parce que la variable d'environnement DATABASE_URL n'est pas définie. Il peut aussi dire qu'il n'a pas réussi à lire les logs Grafana (il y a des bugs), mais il doit dire quelque part que ça a un rapport avec ce manque de variable d'environnement.",
+    "coefficient": 1
+  },
+  "7": {
+    "context": "Pour pouvoir rendre son conteneur fonctionnel, il faut que l'élève créé la string de connexion à la base qui sera injectée dans son conteneur. L'élève a juste un accès à une base principale 'postgres' du serveur, mais pas la base dédiée au projet. Il a cependant les droits de se donner l'autorisation d'y accéder.",
+    "question": "Avec votre outil de management de base de données, connectez-vous à votre base de données et vérifiez que vous pouvez y accéder. Y arrivez-vous ? Tentez maintenant avec la base “postgres”. Y arrivez-vous ? Pourquoi n’avez-vous pas les droits (petit coup d’oeil sur la documentation PostgreSQL ) ?",
+    "answer": "L'élève doit dire qu'il n'arrive pas à accéder à la base de données. Mais qu'il devrait y arriver avec la base postgres. Il doit aussi expliquer pourquoi il n'a pas les droits. Il doit surtout expliquer qu'il n'a pas les droits sur la base dédiée au projet, mais qu'il a les droits sur la base postgres (c'est bien s'il cite des choses comme GRANT CONNECT, GRAND ALL PRIVILEGES, ...).",
+    "coefficient": 1
+  },
+  "8": {
+    "context": "Le MCP est configuré et déployé, il est également branché sur Mistral LeChat, qui sait maintenant l'utiliser.",
+    "question": "Demandez au LLM de vous fournir la liste des classes, et de la formatter en JSON.",
+    "answer": "Sa réponse doit être une liste de classes au format JSON. ```json\n[\n    {\n        \"id\": 1,\n        \"class_code\": \"CS-2024-A\",\n        \"class_name\": \"Computer Science - Morning Batch\",\n        \"start_date\": \"2024-09-01\",\n        \"created_at\": \"2025-12-11T21:30:15.245095\"\n    },\n    {\n        \"id\": 2,\n        \"class_code\": \"CS-2024-B\",\n        \"class_name\": \"Computer Science - Afternoon Batch\",\n        \"start_date\": \"2024-09-01\",\n        \"created_at\": \"2025-12-11T21:30:15.245095\"\n    },\n    {\n        \"id\": 3,\n        \"class_code\": \"CS-2024-C\",\n        \"class_name\": \"Computer Science - Evening Batch\",\n        \"start_date\": \"2024-09-01\",\n        \"created_at\": \"2025-12-11T21:30:15.245095\"\n    },\n    {\n        \"id\": 4,\n        \"class_code\": \"CS-2024-D\",\n        \"class_name\": \"Computer Science - Weekend Batch\",\n        \"start_date\": \"2024-09-15\",\n        \"created_at\": \"2025-12-11T21:30:15.245095\"\n    }\n]\n```. Ce n'est pas grave si tous les champs ne sont pas présents, il faut au moins l'ID et le class_code.",
+    "coefficient": 1
+  },
+  "9": {
+    "context": "L'élève est en train de faire exécuter des requêtes SQL par le LLM via le MCP, directement dans la base de données.",
+    "question": "Tentez de vous ajouter par le LLM en tant que nouvel(le) étudiant(e) dans la base de données. Montrez la requête SQL écrite par le LLM (dans le document de réponses au TP), et exécutez-la. Via votre outil de management de base de données, vérifiez que vous avez bien été ajouté(e).",
+    "answer": "L'élève doit avoir réussi à s'ajouter dans la base de données. Le LLM doit lui avoir fourni une requête de ce genre : ```sql\nINSERT INTO students (\n    student_id,\n    first_name,\n    last_name,\n    date_of_birth,\n    email,\n    enrollment_date,\n    class_id,\n    gpa\n)\nVALUES (\n    '[ID]',\n    '[Prénom]',\n    '[Nom]',   \n    '[Date de naissance]',\n    '[Email]',\n    '[Date d'inscription]',\n    [CLASS_ID],\n    [GPA]\n);``` \n Evidemment les informations entre crochets ([]) sont à ignorer/remplacer par l'élève.",
+    "coefficient": 1
+  },
+  "10": {
+    "context": "L'élève a créé un utilisateur dédié pour accéder à la base de donnée via le MCP, dont il a rangé le mot de passe dans un secret Scaleway.",
+    "question": "Quel est l’identifiant Scaleway du secret contenant la connection_string ?",
+    "answer": "L'élève doit répondre un identifiant Scaleway. Celui-ci doit obligatoirement être un UUID, et peut commencer par `fr-par/`.",
+    "coefficient": 1
+  },
+  "11": {
+    "context": "L'élève a créé un utilisateur dédié pour accéder à la base de donnée via le MCP, dont il a rangé le mot de passe dans un secret Scaleway. Il a utilisé normalement de quoi générer aléatoirement son mot de passe.",
+    "question": "Quel est le mot de passe de l’utilisateur en lecture seule ? Allez chercher celui-ci dans le fichier terraform.tfstate. Indiquez son chemin en norme JSONPath .",
+    "answer": "L'élève doit donner un premier mot de passe, qui a l'air plutôt fort et plutôt généré aléatoirement. Puis, il doit donner le chemin JSONPath du mot de passe dans le fichier terraform.tfstate, par exemple : `$.COMPLEX_PATH.instances[0].attributes.password`. Le `COMPLEX_PATH` peut être plein de choses différentes ; un accès direct (par exemple `$.resources[10]`), une recherche (`$.resources[?(@.name=='reader')]`), ... . Si l'élève a répondu une commande jq, compte lui comme juste mais enlève lui 0.25 points.",
+    "coefficient": 1
+  },
+  "12": {
+    "context": "Question bonus où l'élève fait écrire des requêtes par le LLM et récupère les résultats. Compte 0,75 pour la bonne requête SQL, 0,25 pour les bons résultats.",
+    "question": "Quel est le nombre d’étudiants par classe ?",
+    "answer": "La requête SQL doit ressembler à : ```sql\n             SELECT c.class_code, c.class_name, COUNT(s.id) as student_count\n            FROM classes c\n            LEFT JOIN students s ON c.id = s.class_id\n            GROUP BY c.id, c.class_code, c.class_name```. Il doit normalement y avoir 4 classes, toutes de 30-40 élèves (à peu près).",
+    "coefficient": 1
+  },
+  "13": {
+    "context": "Question bonus où l'élève fait écrire des requêtes par le LLM et récupère les résultats. Compte 0,75 pour la bonne requête SQL, 0,25 pour les bons résultats.",
+    "question": "Quel est le GPA moyen par classe ?",
+    "answer": "La requête SQL doit ressembler à : ```sql\n            SELECT c.class_code, ROUND(AVG(s.gpa), 2) as avg_gpa\n            FROM classes c\n            LEFT JOIN students s ON c.id = s.class_id\n            GROUP BY c.id```. Il doit y avoir 4 classes, avec un GPA entre 2,8 et 3,1 (à peu près).",
+    "coefficient": 1
+  },
+  "14": {
+    "context": "Question bonus où l'élève fait écrire des requêtes par le LLM et récupère les résultats. Compte 0,75 pour la bonne requête SQL, 0,25 pour les bons résultats.",
+    "question": "Quels sont les 5 cours les plus populaires ?",
+    "answer": "La requête SQL doit ressembler à : ```sql\n             SELECT c.course_name, COUNT(e.id) as enrollment_count\n            FROM courses c\n            LEFT JOIN enrollments e ON c.id = e.course_id\n            GROUP BY c.id, c.course_name\n            ORDER BY enrollment_count DESC\n            LIMIT 5```. Il doit y avoir 5 lignes, qui doivent ressembler approximativement à celles-ci (en tout cas les noms de cours devraient être les mêmes) : ```\"course_name\",\"total_enrollments\"\n\"DevOps and CI/CD Pipelines\",45\n\"Database Design and SQL\",45\n\"Full Stack Development\",44\n\"Web Development with React\",44\n\"Machine Learning Fundamentals\",43```.",
+    "coefficient": 1
+  }
+}

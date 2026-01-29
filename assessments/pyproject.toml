@@ -17,5 +17,10 @@ dependencies = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[dependency-groups]
+test = [
+    "pytest>=9.0.2",
+]
+
 [project.scripts]
 assessments = "assessments.app:app"

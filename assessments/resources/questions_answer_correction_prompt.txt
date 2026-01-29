@@ -1,0 +1,13 @@
+### 1. Contexte de l'exercice
+{context}
+
+### 2. Question posée
+{question}
+
+### 3. Critères de correction (Attendus)
+{answer}
+
+### 4. Réponse de l'étudiant
+"""
+{{student_answer}}
+"""
