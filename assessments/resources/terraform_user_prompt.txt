@@ -1,0 +1,9 @@
+Voici les données pour la correction du TP Terraform.
+
+### 1. Critères de notation (JSON)
+{{criterias}}
+
+### 2. Code de l'étudiant
+```hcl
+{{student_code}}
+```

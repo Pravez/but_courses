@@ -7,7 +7,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables import Runnable
 from langchain_mistralai import ChatMistralAI
 from langchain_core.messages import SystemMessage, HumanMessage
-from assessments.models import AnswerCorrection
+from assessments.models import AnswerCorrection, TerraformRating
 
 resources_path = Path(__file__).parent.parent.parent / "resources"
 
@@ -18,10 +18,14 @@ class AnswerRater:
     user_prompt_template: str
     llm: BaseChatModel
     structured_llm: Runnable
+    terraform_structured_llm: Runnable
+    terraform_system_prompt: str
+    terraform_user_prompt_template: str
 
     def __init__(self, llm: BaseChatModel):
         self.llm = llm
         self.structured_llm = self.llm.with_structured_output(AnswerCorrection)
+        self.terraform_structured_llm = self.llm.with_structured_output(TerraformRating)
         self._load_resources()
 
     def _load_resources(self):
@@ -29,6 +33,12 @@ class AnswerRater:
         self.system_prompt = (resources_path / "questions_system_prompt.txt").read_text()
         self.user_prompt_template = (
             resources_path / "questions_answer_correction_prompt.txt"
+        ).read_text()
+        self.terraform_system_prompt = (
+            resources_path / "terraform_system_prompt.txt"
+        ).read_text()
+        self.terraform_user_prompt_template = (
+            resources_path / "terraform_user_prompt.txt"
         ).read_text()
 
     def rate_student_answers(self, student_row: Dict[str, Any], num_questions: int = 14) -> Dict[str, Any]:
@@ -80,3 +90,15 @@ class AnswerRater:
         ]
 
         return self.structured_llm.invoke(messages)
+
+    def rate_terraform(self, student_code: str, criterias: List[Dict[str, Any]]) -> TerraformRating:
+        user_message_content = self.terraform_user_prompt_template.replace(
+            "{{criterias}}", json.dumps(criterias, indent=2, ensure_ascii=False)
+        ).replace("{{student_code}}", student_code)
+
+        messages = [
+            SystemMessage(content=self.terraform_system_prompt),
+            HumanMessage(content=user_message_content),
+        ]
+
+        return self.terraform_structured_llm.invoke(messages)

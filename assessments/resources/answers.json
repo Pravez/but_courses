@@ -3,35 +3,43 @@
   "terraform_criterias": [
     {
       "name": "container",
-      "criteria": "Le Terraform doit contenir une ressource 'scaleway_container', avec les propriétés suivantes : cpu_limit à 100 et memory_limit à 256"
+      "criteria": "Le Terraform doit contenir une ressource 'scaleway_container', avec les propriétés suivantes : cpu_limit à 100 et memory_limit à 256",
+      "coefficient": 1
     },
     {
       "name": "registry",
-      "criteria": "Le Terraform doit contenir un data 'scaleway_container_namespace' et un data 'scaleway_registry_image'. Plus de points si le data dépend du 'terraform_remote_state' que si c'est un data statique (valeurs en dur)."
+      "criteria": "Le Terraform doit contenir un data 'scaleway_container_namespace' et un data 'scaleway_registry_image'. Plus de points si le data dépend du 'terraform_remote_state' que si c'est un data statique (valeurs en dur).",
+      "coefficient": 1
     },
     {
       "name": "container_image",
-      "criteria": "L'attribut 'registry_image' du 'scaleway_container' doit être défini en fonction du container namespace et du registry image. Par exemple \"${data.scaleway_container_namespace.namespace.registry_endpoint}/${data.scaleway_registry_image.image.name}:[TAG]\" (pas de problème si le tag ne dépend pas d'une ressource/data terraform, ou est en dur)"
+      "criteria": "L'attribut 'registry_image' du 'scaleway_container' doit être défini en fonction du container namespace et du registry image. Par exemple \"${data.scaleway_container_namespace.namespace.registry_endpoint}/${data.scaleway_registry_image.image.name}:[TAG]\" (pas de problème si le tag ne dépend pas d'une ressource/data terraform, ou est en dur)",
+      "coefficient": 1
     },
     {
       "name": "database",
-      "criteria": "Le terraform doit contenir un data 'scaleway_rdb_instance'. Plus de points s'il dépend du 'terraform_remote_state' que si c'est un data statique (valeurs en dur)."
+      "criteria": "Le terraform doit contenir un data 'scaleway_rdb_instance'. Plus de points s'il dépend du 'terraform_remote_state' que si c'est un data statique (valeurs en dur).",
+      "coefficient": 1
     },
     {
       "name": "database_users",
-      "criteria": "Le terraform doit contenir au moins un utilisateur qui correspond à l'élève."
+      "criteria": "Le terraform doit contenir au moins un utilisateur qui correspond à l'élève.",
+      "coefficient": 1
     },
     {
       "name": "database_connection_string",
-      "criteria": "Le terraform doit contenir un bloc 'locals' qui contient la connection_string pour se connecter à la base PostgreSQL. Bonus si elle est construite à partir d'une ressource 'scaleway_rdb_instance' et d'un secret Scaleway, d'un random_password, ou d'un utilisateur 'scaleway_rdb_user'."
+      "criteria": "Le terraform doit contenir un bloc 'locals' qui contient la connection_string pour se connecter à la base PostgreSQL. Bonus si elle est construite à partir d'une ressource 'scaleway_rdb_instance' et d'un secret Scaleway, d'un random_password, ou d'un utilisateur 'scaleway_rdb_user'.",
+      "coefficient": 1
     },
     {
       "name": "container_database_connection",
-      "criteria": "Le terraform doit contenir une ressource 'scaleway_container' qui se connecte à la base PostgreSQL. La connection string doit être fournie en 'environment_variables' du container (bonus si fournie en 'secret_environment_variables')."
+      "criteria": "Le terraform doit contenir une ressource 'scaleway_container' qui se connecte à la base PostgreSQL. La connection string doit être fournie en 'environment_variables' du container (bonus si fournie en 'secret_environment_variables').",
+      "coefficient": 1
     },
     {
       "name": "database_users_privileges",
-      "criteria": "Le terraform doit contenir une ou plusieurs ressources 'scaleway_rdb_privilege' avec la permission 'all'. Bonus s'il y a un deuxième utilisateur qui a la permission 'readonly'."
+      "criteria": "Le terraform doit contenir une ou plusieurs ressources 'scaleway_rdb_privilege' avec la permission 'all'. Bonus s'il y a un deuxième utilisateur qui a la permission 'readonly'.",
+      "coefficient": 1
     }
   ],
   "1": {
