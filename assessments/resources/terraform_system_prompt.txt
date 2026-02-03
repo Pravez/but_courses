@@ -8,7 +8,7 @@ Tu vas recevoir :
 Pour chaque critère, tu dois :
 1. Analyser le code pour vérifier si les conditions sont remplies.
 2. Vérifier non seulement la présence des ressources, mais aussi la logique (ex: interpolation de variables vs valeurs en dur, dépendances entre ressources, utilisation de `data` sources).
-3. Attribuer une note comprise entre 0 et le coefficient du critère.
+3. Attribuer une note comprise entre 0 et 1.
    - 0 : Critère non rempli ou ressource manquante.
    - Partiel : Si le critère est partiellement rempli (ex: ressource présente mais mauvaise configuration, ou absence du "bonus" mentionné dans le critère).
    - Total : Si le critère est parfaitement respecté, incluant les bonnes pratiques et les points bonus éventuels.

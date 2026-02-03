@@ -7,6 +7,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from rich.table import Table
 import typer
 from langchain_mistralai import ChatMistralAI
+from .tui.app import AssessmentsReviewerApp
 
 from assessments.processing import (
     load_markdown_answers,
@@ -161,12 +162,15 @@ def compute_grades(
 
     # Extract coefficients for questions "1" to "14"
     coeffs = {}
+    bonus_questions = []
     for i in range(1, 15):
         q_id = str(i)
         q_info = answers_data.get(q_id, {})
         coeffs[i] = q_info.get("coefficient", 1)
+        if q_info.get("bonus"):
+            bonus_questions.append(i)
 
-    total_coeffs = sum(coeffs.values())
+    total_normal_coeffs = sum(coeff for i, coeff in coeffs.items() if i not in bonus_questions)
 
     # Extract coefficients for terraform criterias
     terraform_criterias = answers_data.get("terraform_criterias", [])
@@ -182,16 +186,22 @@ def compute_grades(
         
         # Calculate answers grade
         answers_weighted_sum = 0.0
+        bonus_points = 0.0
         for i in range(14):
+            q_num = i + 1
             col_name = f"answer_correction_{i}"
             correction_json = row.get(col_name)
             if correction_json:
                 correction = json.loads(correction_json)
                 note = correction.get("note", 0.0)
-                coeff = coeffs.get(i + 1, 1)
-                answers_weighted_sum += note * coeff
+                coeff = coeffs.get(q_num, 1)
+                if q_num in bonus_questions:
+                    bonus_points += (note / 20.0) * coeff
+                else:
+                    answers_weighted_sum += note * coeff
         
-        answers_grade_20 = (answers_weighted_sum / total_coeffs) * 20 if total_coeffs > 0 else 0.0
+        answers_grade_20 = (answers_weighted_sum / total_normal_coeffs) * 20 if total_normal_coeffs > 0 else 0.0
+        answers_grade_20 = min(20.0, answers_grade_20 + bonus_points)
 
         # Calculate terraform grade
         tf_weighted_sum = 0.0
@@ -234,6 +244,25 @@ def compute_grades(
         )
 
     rich.print(table)
+
+@app.command()
+def review_grades(
+        answers_file: Annotated[Path, typer.Option("--answers", "-a")],
+        ratings_file: Annotated[Path, typer.Option("--ratings", "-r")],
+        terraform_ratings_file: Annotated[Path, typer.Option("--terraform-ratings", "-t")],
+):
+    df_answers = pl.read_parquet(answers_file)
+    df_ratings = pl.read_parquet(ratings_file)
+    df_tf_ratings = pl.read_parquet(terraform_ratings_file)
+
+    df = df_answers.join(df_ratings, on="username").join(df_tf_ratings, on="username")
+
+    answers_json_path = Path(__file__).parent.parent.parent / "resources" / "answers.json"
+    with open(answers_json_path, "r") as f:
+        answers_data = json.load(f)
+
+    _app = AssessmentsReviewerApp(df=df, answers_data=answers_data)
+    _app.run()
 
 if __name__ == "__main__":
     app()

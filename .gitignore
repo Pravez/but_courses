@@ -40,3 +40,7 @@ backend.hcl
 
 !tp_sources/terraform/src/stack/terraform.auto.tfvars
 *.env
+*.parquet
+*.zip
+tp_sources/
+students_answers
