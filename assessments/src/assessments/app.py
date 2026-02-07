@@ -11,7 +11,7 @@ from .tui.app import AssessmentsReviewerApp
 
 from assessments.processing import (
     load_markdown_answers,
-    process_zip_answers,
+    process_archive_answers,
     create_parquet_from_answers,
 )
 from assessments.rating import AnswerRater
@@ -31,7 +31,7 @@ def prepare_answers(
     input_directory: Annotated[Path, typer.Argument(help="Path to the input directory")],
     output_file: Annotated[Path, typer.Argument(help="Path to the output file")],
 ):
-    answers = process_zip_answers(input_directory)
+    answers = process_archive_answers(input_directory)
     create_parquet_from_answers(answers, output_file, num_answers=14)
 
 @app.command(name="rate_answers")

@@ -10,6 +10,7 @@ dependencies = [
     "langchain-mistralai>=1.1.1",
     "langsmith>=0.4.59",
     "polars>=1.36.1",
+    "py7zr>=1.1.0",
     "pydantic>=2.12.5",
     "textual>=7.5.0",
     "typer>=0.20.0",

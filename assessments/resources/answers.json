@@ -49,7 +49,7 @@
     {
       "name": "security",
       "criteria": "Présence d'une ressource scaleway_secret et scaleway_secret_version qui montre que l'élève a poussé l'aspect sécurité plus loin pour gérer les secrets de son application.",
-      "coefficient": 2
+      "coefficient": 3
     }
   ],
   "1": {

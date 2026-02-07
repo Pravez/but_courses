@@ -1,8 +1,12 @@
+from faker.decode import unidecode
 from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer, ListView, ListItem, Label, TabbedContent, TabPane, Static, DataTable
 from textual.containers import Horizontal, Vertical, ScrollableContainer
 import polars as pl
+import re
 import json
+
+REPLACE_ID_REGEX=r"[\\ \[\]\?:]+"
 
 class AssessmentsReviewerApp(App):
     BINDINGS = [
@@ -71,7 +75,7 @@ class AssessmentsReviewerApp(App):
 
     def __init__(self, df: pl.DataFrame, answers_data: dict):
         super().__init__()
-        self.df = df
+        self.df = df.with_columns(pl.col("username").str.replace_all(REPLACE_ID_REGEX, "_").map_elements(lambda x: unidecode(x.lower())).alias("username"))
         self.answers_data = answers_data
 
     def compose(self) -> ComposeResult:

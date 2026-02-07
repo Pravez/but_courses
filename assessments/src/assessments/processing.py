@@ -2,35 +2,51 @@ import tempfile
 import zipfile
 from pathlib import Path
 from typing import List
-
+import py7zr
+import tarfile
 import polars as pl
 import rich
 
 from assessments.files import convert_markdown_to_answers
 
-def process_zip_answers(input_directory: Path) -> List[dict]:
-    rich.print(f"Searching for zip files in {input_directory}...")
+def process_archive_answers(input_directory: Path) -> List[dict]:
+    rich.print(f"Searching for archive files in {input_directory}...")
+
+    # Collect all supported archive types
     zip_files = list(input_directory.rglob("*.zip"))
-    rich.print(f"Found {len(zip_files)} zip files.")
+    tar_gz_files = list(input_directory.rglob("*.tar.gz"))
+    sevenz_files = list(input_directory.rglob("*.7z"))
+
+    all_archives = zip_files + tar_gz_files + sevenz_files
+    rich.print(
+        f"Found {len(all_archives)} archive files ({len(zip_files)} zip, {len(tar_gz_files)} tar.gz, {len(sevenz_files)} 7z).")
 
     answers = []
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
-        for zip_file in zip_files:
-            extract_to = temp_path / zip_file.stem
+        for archive_file in all_archives:
+            extract_to = temp_path / archive_file.stem
             try:
-                with zipfile.ZipFile(zip_file, "r") as zip_ref:
-                    zip_ref.extractall(extract_to)
+                if archive_file.suffix == ".zip":
+                    with zipfile.ZipFile(archive_file, "r") as zip_ref:
+                        zip_ref.extractall(extract_to)
+                elif archive_file.suffix == ".gz" and archive_file.suffixes[-2:] == [".tar", ".gz"]:
+                    with tarfile.open(archive_file, "r:gz") as tar_ref:
+                        tar_ref.extractall(extract_to)
+                elif archive_file.suffix == ".7z":
+                    with py7zr.SevenZipFile(archive_file, mode="r") as sevenz_ref:
+                        sevenz_ref.extractall(path=extract_to)
+
             except Exception as e:
-                rich.print(f"[red]Error extracting {zip_file}: {e}[/red]")
+                rich.print(f"[red]Error extracting {archive_file}: {e}[/red]")
                 continue
 
             terraform_content = _extract_terraform_content(extract_to)
 
             answer_files = list(extract_to.rglob("ANSWERS.md"))
             if not answer_files:
-                rich.print(f"[red]Error: ANSWERS.md not found in {zip_file}[/red]")
+                rich.print(f"[red]Error: ANSWERS.md not found in {archive_file}[/red]")
                 continue
 
             for f in answer_files:
@@ -44,8 +60,15 @@ def _extract_terraform_content(extract_to: Path) -> str:
     tf_files = sorted(extract_to.rglob("*.tf"))
     terraform_content = ""
     for tf_f in tf_files:
+        if "__MACOSX" in tf_f.parts:
+            rich.print(f"[orange]Skipping {tf_f}[/orange]")
+            continue
         terraform_content += f"--- {tf_f.relative_to(extract_to)} ---\n"
-        terraform_content += tf_f.read_text()
+        try:
+            terraform_content += tf_f.read_text()
+        except UnicodeDecodeError:
+            rich.print(f"[red]Error reading {tf_f}[/red]")
+            terraform_content += "Error reading file"
         terraform_content += "\n\n"
     return terraform_content
 

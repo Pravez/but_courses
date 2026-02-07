@@ -2,7 +2,7 @@ from pathlib import Path
 import re
 from typing import TypedDict
 
-ANSWERS_PARSING_REGEX = r"#{2,3} Question \d+.*?\n(.*?)(?=\n#{2,3} Question|\Z)"
+ANSWERS_PARSING_REGEX = r"#{2,3} `?Question \d+`?.*?\n(.*?)(?=\n#{2,3} `?Question|\Z)"
 
 
 class Answers(TypedDict):
