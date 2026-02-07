@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "fastexcel>=0.19.0",
     "langchain>=1.2.0",
     "langchain-google-genai>=4.2.0",
     "langchain-mistralai>=1.1.1",
