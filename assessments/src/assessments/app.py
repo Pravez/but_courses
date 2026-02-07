@@ -1,3 +1,5 @@
+import re
+from faker.decode import unidecode
 from pathlib import Path
 from typing import Annotated, Optional
 import json
@@ -15,6 +17,8 @@ from assessments.processing import (
     create_parquet_from_answers,
 )
 from assessments.rating import AnswerRater
+
+REPLACE_ID_REGEX = r"[\\ \[\]\?:]+"
 
 app = typer.Typer()
 
@@ -244,6 +248,133 @@ def compute_grades(
         )
 
     rich.print(table)
+
+@app.command(name="to_excel")
+def to_excel(
+    input_file: Annotated[Path, typer.Argument(help="Path to the ratings parquet file")],
+    terraform_input_file: Annotated[Path, typer.Argument(help="Path to the terraform ratings parquet file")],
+    csv_users_files: Annotated[list[Path], typer.Argument(help="List of students CSV files")],
+    output_file: Annotated[Path, typer.Option("-o", "--output", help="Output Excel file")] = Path("grades.xlsx"),
+    answers_file: Annotated[Path, typer.Option(help="Path to the answers.json file")] = Path(__file__).parent.parent.parent / "resources" / "answers.json",
+):
+    rich.print(f"Loading ratings from {input_file} ...")
+    df_answers = pl.read_parquet(input_file)
+
+    rich.print(f"Loading terraform ratings from {terraform_input_file} ...")
+    df_terraform = pl.read_parquet(terraform_input_file)
+
+    rich.print(f"Loading students from {len(csv_users_files)} files ...")
+    dfs_students = []
+    for csv_file in csv_users_files:
+        df_s = pl.read_csv(csv_file)
+        df_s = df_s.with_columns(pl.lit(csv_file.stem).alias("group"))
+        dfs_students.append(df_s)
+    df_students = pl.concat(dfs_students)
+
+    rich.print(f"Loading answers from {answers_file} ...")
+    with open(answers_file, "r") as f:
+        answers_data = json.load(f)
+
+    # Normalize students usernames for matching
+    df_students = df_students.with_columns(
+        pl.col("username").str.replace_all(REPLACE_ID_REGEX, "_")
+        .map_elements(lambda x: unidecode(x.lower()), return_dtype=pl.String)
+        .alias("normalized_username")
+    )
+
+    # Extract coefficients for questions "1" to "14"
+    coeffs = {}
+    bonus_questions = []
+    for i in range(1, 15):
+        q_id = str(i)
+        q_info = answers_data.get(q_id, {})
+        coeffs[i] = q_info.get("coefficient", 1)
+        if q_info.get("bonus"):
+            bonus_questions.append(i)
+
+    total_normal_coeffs = sum(coeff for i, coeff in coeffs.items() if i not in bonus_questions)
+
+    # Extract coefficients for terraform criterias
+    terraform_criterias = answers_data.get("terraform_criterias", [])
+    tf_coeffs = {i: c.get("coefficient", 1) for i, c in enumerate(terraform_criterias)}
+    total_tf_coeffs = sum(tf_coeffs.values())
+
+    # Join both dataframes on username
+    df = df_answers.join(df_terraform, on="username", how="inner")
+
+    results = []
+    for row in df.to_dicts():
+        username = row["username"]
+
+        # Calculate answers grade
+        answers_weighted_sum = 0.0
+        bonus_points = 0.0
+        for i in range(14):
+            q_num = i + 1
+            col_name = f"answer_correction_{i}"
+            correction_json = row.get(col_name)
+            if correction_json:
+                correction = json.loads(correction_json)
+                note = correction.get("note", 0.0)
+                coeff = coeffs.get(q_num, 1)
+                if q_num in bonus_questions:
+                    bonus_points += (note / 20.0) * coeff
+                else:
+                    answers_weighted_sum += note * coeff
+
+        answers_grade_20 = (answers_weighted_sum / total_normal_coeffs) * 20 if total_normal_coeffs > 0 else 0.0
+        answers_grade_20 = min(20.0, answers_grade_20 + bonus_points)
+
+        # Calculate terraform grade
+        tf_weighted_sum = 0.0
+        for i, criteria in enumerate(terraform_criterias):
+            col_name = criteria['name']
+            correction_json = row.get(col_name)
+            if correction_json:
+                correction = json.loads(correction_json)
+                note = correction.get("note", 0.0)
+                coeff = tf_coeffs.get(i, 1)
+                tf_weighted_sum += note * coeff
+
+        tf_grade_20 = (tf_weighted_sum / total_tf_coeffs) * 20 if total_tf_coeffs > 0 else 0.0
+
+        # Final composite grade: 60% answers, 40% terraform
+        final_grade = (answers_grade_20 * 0.6) + (tf_grade_20 * 0.4)
+
+        # Matching with CSV
+        normalized_username = unidecode(re.sub(REPLACE_ID_REGEX, "_", username).lower())
+        student_match = df_students.filter(pl.col("normalized_username") == normalized_username)
+
+        if not student_match.is_empty():
+            first_name = student_match["first_name"][0]
+            last_name = student_match["last_name"][0]
+            username_to_use = student_match["username"][0]
+            group = student_match["group"][0]
+        else:
+            first_name = None
+            last_name = None
+            username_to_use = username
+            group = "Unknown"
+
+        results.append({
+            "group": group,
+            "first_name": first_name,
+            "last_name": last_name,
+            "username": username_to_use,
+            "answers_grade": answers_grade_20,
+            "terraform_grade": tf_grade_20,
+            "global_grade": final_grade
+        })
+
+    output_df = pl.DataFrame(results)
+    # Ensure column order
+    output_df = output_df.select([
+        "group", "first_name", "last_name", "username", "answers_grade", "terraform_grade", "global_grade"
+    ])
+
+    rich.print(f"Generating Excel output to {output_file} ...")
+    output_df.write_excel(output_file)
+    rich.print("Done.")
 
 @app.command()
 def review_grades(
